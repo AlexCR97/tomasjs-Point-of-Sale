@@ -1,3 +1,3 @@
 export class GetProductQuery {
-  id!: string;
+  constructor(readonly id: string) {}
 }

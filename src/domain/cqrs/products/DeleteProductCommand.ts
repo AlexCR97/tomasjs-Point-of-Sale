@@ -1,3 +1,3 @@
 export class DeleteProductCommand {
-  id!: string;
+  constructor(readonly id: string) {}
 }
