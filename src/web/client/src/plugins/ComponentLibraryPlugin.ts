@@ -4,9 +4,9 @@ import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
 import "@/assets/primevue.css";
 import PrimeVue from "primevue/config";
-import type { ModuleFunction } from "./ModuleFunction";
+import type { Plugin } from "vue";
 
-export const ComponentLibraryModule: ModuleFunction = (app) => {
+export const ComponentLibraryPlugin: Plugin = (app) => {
   app.use(PrimeVue, {
     ripple: true, // Enable/disable ripple effect
   });
