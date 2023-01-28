@@ -1,2 +1,2 @@
 export { ProductRepo } from "./ProductRepo";
-export { ReposSetup } from "./ReposSetup";
+export { WarehouseRepo } from "./WarehouseRepo";

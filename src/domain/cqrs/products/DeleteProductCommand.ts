@@ -1,3 +1,3 @@
-export class DeleteProductCommand {
-  constructor(readonly id: string) {}
-}
+import { DeleteCommand } from "@/core/cqrs/commands";
+
+export class DeleteProductCommand extends DeleteCommand<string> {}
