@@ -1,28 +1,19 @@
 <script setup lang="ts">
-import Button from "primevue/button";
+import Sidebar from "@/components/Sidebar.vue";
+import Topbar from "@/components/Topbar.vue";
 </script>
 
 <template>
-  <main>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas inventore
-      officia voluptatum voluptate beatae impedit aliquam laboriosam!
-      Consequatur rerum earum, non ea quas id repellendus maxime blanditiis
-      alias explicabo ducimus.
-    </p>
-
-    <p>
-      Lorem ipsum, dolor sit amet consectetur adipisicing elit. Illo voluptates,
-      corrupti dolorum dignissimos ad perferendis neque libero porro sed alias
-      eum ipsa debitis repellat. Asperiores architecto ea porro illum ad!
-    </p>
-
-    <Button>This is a button</Button>
-
-    <div class="flex">
-      <p>Paragraph 1</p>
-      <p>Paragraph 2</p>
-      <p>Paragraph 3</p>
+  <div class="flex h-screen">
+    <aside class="border-right-1 border-200 w-16rem h-full">
+      <Sidebar />
+    </aside>
+    <div class="flex flex-column w-full h-full">
+      <Topbar />
+      <main class="h-full overflow-y-auto">
+        <RouterView />
+      </main>
+      <!-- <footer class="border-top-1 border-200">Footer</footer> -->
     </div>
-  </main>
+  </div>
 </template>
