@@ -5,8 +5,30 @@ export const Router = createRouter({
   routes: [
     {
       path: "/",
-      name: "home",
+      redirect: "/admin",
+    },
+    {
+      path: "/admin",
+      name: "admin",
       component: () => import("../pages/home-page.vue"),
+      children: [
+        {
+          path: "/warehouses",
+          name: "warehouses",
+          meta: {
+            title: "Warehouses",
+          },
+          component: () => import("../pages/warehouses/warehouses-page.vue"),
+        },
+        {
+          path: "/products",
+          name: "products",
+          meta: {
+            title: "Products",
+          },
+          component: () => import("../pages/products/products-page.vue"),
+        },
+      ],
     },
   ],
 });

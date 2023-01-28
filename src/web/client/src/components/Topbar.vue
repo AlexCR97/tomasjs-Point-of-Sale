@@ -35,7 +35,7 @@ const items = ref<MenuItem[]>([
 </script>
 
 <template>
-  <header class="border-bottom-1 border-200">
+  <header>
     <Menubar :model="items">
       <template #end>
         <UserMenu />

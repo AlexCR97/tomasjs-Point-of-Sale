@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageHeader from "@/components/page-header/PageHeader.vue";
 import Sidebar from "@/components/Sidebar.vue";
 import Topbar from "@/components/Topbar.vue";
 </script>
@@ -10,9 +11,12 @@ import Topbar from "@/components/Topbar.vue";
     </aside>
     <div class="flex flex-column w-full h-full">
       <Topbar />
-      <main class="h-full overflow-y-auto">
-        <RouterView />
-      </main>
+      <div class="h-full overflow-y-auto">
+        <PageHeader />
+        <main class="px-3">
+          <RouterView />
+        </main>
+      </div>
       <!-- <footer class="border-top-1 border-200">Footer</footer> -->
     </div>
   </div>
