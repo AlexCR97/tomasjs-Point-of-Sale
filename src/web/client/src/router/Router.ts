@@ -13,20 +13,24 @@ export const Router = createRouter({
       component: () => import("../pages/home-page.vue"),
       children: [
         {
-          path: "/warehouses",
-          name: "warehouses",
-          meta: {
-            title: "Warehouses",
-          },
-          component: () => import("../pages/warehouses/warehouses-page.vue"),
+          path: "/",
+          redirect: "/admin/products",
         },
         {
-          path: "/products",
+          path: "/admin/products",
           name: "products",
           meta: {
             title: "Products",
           },
           component: () => import("../pages/products/products-page.vue"),
+        },
+        {
+          path: "/admin/warehouses",
+          name: "warehouses",
+          meta: {
+            title: "Warehouses",
+          },
+          component: () => import("../pages/warehouses/warehouses-page.vue"),
         },
       ],
     },

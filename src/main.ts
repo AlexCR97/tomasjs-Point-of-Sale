@@ -23,6 +23,7 @@ async function main() {
 
   // Initialize your http pipeline here
   await new AppBuilder()
+    .useCors()
     .useJson()
     .useEndpointGroup(ProductEndpoints)
     .useEndpointGroup(WarehouseEndpoints)

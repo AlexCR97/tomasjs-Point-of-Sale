@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 
-onMounted(() => {});
+onMounted(() => {
+  console.log("mounted");
+});
 </script>
 
 <template>

@@ -2,6 +2,12 @@
 import PageHeader from "@/components/page-header/PageHeader.vue";
 import Sidebar from "@/components/Sidebar.vue";
 import Topbar from "@/components/Topbar.vue";
+import { onMounted } from "vue";
+import { RouterView } from "vue-router";
+
+onMounted(() => {
+  console.log("mounted");
+});
 </script>
 
 <template>
