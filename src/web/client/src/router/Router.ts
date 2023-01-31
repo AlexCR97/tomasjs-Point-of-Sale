@@ -5,7 +5,7 @@ export const Router = createRouter({
   routes: [
     {
       path: "/",
-      redirect: "/admin",
+      redirect: "/admin/products",
     },
     {
       path: "/admin",
@@ -13,7 +13,7 @@ export const Router = createRouter({
       component: () => import("../pages/home-page.vue"),
       children: [
         {
-          path: "/",
+          path: "/admin",
           redirect: "/admin/products",
         },
         {

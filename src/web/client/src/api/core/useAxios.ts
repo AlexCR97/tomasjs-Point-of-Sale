@@ -7,17 +7,17 @@ export function useAxios(basePath: string): AxiosInstance {
   });
 
   axiosInstance.interceptors.request.use((req) => {
-    console.log("req", req);
+    // console.log("req", req);
     return req;
   });
 
   axiosInstance.interceptors.response.use(
     (res) => {
-      console.log("res", res);
+      // console.log("res", res);
       return res;
     },
     (err) => {
-      console.log("err", err);
+      // console.log("err", err);
       return Promise.reject(err);
     }
   );

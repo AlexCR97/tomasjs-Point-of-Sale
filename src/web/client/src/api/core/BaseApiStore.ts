@@ -20,7 +20,7 @@ export class BaseApiStore<TModel, TCreateRequest, TUpdateRequest>
     await this.api.delete(this.url(id));
   }
 
-  async findAsync(request: FindRequest): Promise<TModel[]> {
+  async findAsync(request?: FindRequest): Promise<TModel[]> {
     const response = await this.api.get<TModel[]>(this.url(), {
       params: request,
     });
