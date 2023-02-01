@@ -8,14 +8,14 @@ import WarehouseSelect from "@/components/warehouse-select/WarehouseSelect.vue";
 
 const standaloneItems = ref<MenuItem[]>([
   {
-    icon: PrimeIcons.BOX,
-    label: "Products",
-    to: { name: "products" },
-  },
-  {
     icon: PrimeIcons.DATABASE,
     label: "Warehouses",
     to: { name: "warehouses" },
+  },
+  {
+    icon: PrimeIcons.BOX,
+    label: "Products",
+    to: { name: "products" },
   },
 ]);
 
@@ -40,7 +40,7 @@ const warehouseItems = ref<MenuItem[]>([
 </script>
 
 <template>
-  <aside class="border-right-1 border-200 w-16rem h-full">
+  <aside class="border-right-1 border-100 w-16rem h-full">
     <PanelMenu :model="standaloneItems" />
     <WarehouseSelect class="mx-3 my-4" />
     <PanelMenu :model="warehouseItems" />

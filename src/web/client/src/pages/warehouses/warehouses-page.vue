@@ -1,32 +1,56 @@
 <script setup lang="ts">
 import { CreateWarehouseRequest, WarehouseModel } from "@/api/warehouses";
 import { WarehouseStore } from "@/api/warehouses/warehouse.store";
-import type { ContextAction } from "@/components/core";
+// import type { ContextAction } from "@/components/core";
 import type {
   DatabaseColumn,
   DatabaseFilters,
   DatabaseLoadFunction,
   IDatabase,
+  RowPrimaryAction,
+  RowSecondaryAction,
+  TableAction,
+  TableBulkAction,
 } from "@/components/database";
-import type { BulkAction } from "@/components/database/BulkAction";
 import Database from "@/components/database/Database.vue";
 import { useLoader } from "@/components/loader";
 import { FilterMatchMode } from "primevue/api";
 import Button from "primevue/button";
+import ConfirmDialog from "primevue/confirmdialog";
 import InputText from "primevue/inputtext";
 import Sidebar from "primevue/sidebar";
-import { onMounted, ref } from "vue";
-import WarehousesTable from "./WarehousesTable.vue";
+import Toast from "primevue/toast";
+import { useConfirm } from "primevue/useconfirm";
+import { useToast } from "primevue/usetoast";
+import { ref } from "vue";
 
 const warehouseStore = new WarehouseStore();
 const loader = useLoader();
+const confirm = useConfirm();
+const toast = useToast();
 const showAddSidebar = ref(false);
 const request = ref(new CreateWarehouseRequest());
-const warehouses = ref<WarehouseModel[]>([]);
 
 const databaseRef = ref<IDatabase>();
 
-const databaseActions = ref<ContextAction[]>([
+const databaseBulkActions = ref<TableBulkAction<WarehouseModel>[]>([
+  {
+    label: "Delete Selected",
+    action: (selectedModels) => {
+      return new Promise<boolean>((resolve) => {
+        confirm.require({
+          message: "Are you sure you want to delete the selected warehouses?",
+          accept: () =>
+            deleteResourcesAsync(selectedModels.map((x) => x._id))
+              .then(() => resolve(true))
+              .catch(() => resolve(false)),
+        });
+      });
+    },
+  },
+]);
+
+const databaseActions = ref<TableAction[]>([
   {
     label: "Add Warehouse",
     action: () => onAdd(),
@@ -34,16 +58,6 @@ const databaseActions = ref<ContextAction[]>([
   {
     label: "Refresh",
     action: () => databaseRef.value?.loadTableAsync(),
-  },
-]);
-
-const databaseBulkActions = ref<BulkAction<WarehouseModel>[]>([
-  {
-    label: "Delete Selected",
-    action: (selectedModels) => {
-      console.log("Delete Selected", selectedModels);
-      return true;
-    },
   },
 ]);
 
@@ -67,32 +81,23 @@ const databaseFilters = ref<DatabaseFilters<WarehouseModel>>({
   },
 });
 
-const databaseMainRowActions = ref<ContextAction<WarehouseModel>[]>([
+const databaseMainRowActions = ref<RowPrimaryAction<WarehouseModel>[]>([
   {
     label: "View",
     action: (warehouse) => {
       console.log("View", warehouse);
-    },
-  },
-  {
-    label: "Delete",
-    action: (warehouse) => {
-      console.log("Delete", warehouse);
     },
   },
 ]);
 
-const databaseSecondaryRowActions = ref<ContextAction<WarehouseModel>[]>([
-  {
-    label: "View",
-    action: (warehouse) => {
-      console.log("View", warehouse);
-    },
-  },
+const databaseSecondaryRowActions = ref<RowSecondaryAction<WarehouseModel>[]>([
   {
     label: "Delete",
     action: (warehouse) => {
-      console.log("Delete", warehouse);
+      confirm.require({
+        message: `Are you sure you want to delete the warehouse "${warehouse.name}"`,
+        accept: () => deleteResourceAsync(warehouse._id),
+      });
     },
   },
 ]);
@@ -105,15 +110,37 @@ const databaseLoadFunction = ref<DatabaseLoadFunction<WarehouseModel>>(
 
 const databaseSelectedRows = ref<WarehouseModel[]>([]);
 
-onMounted(() => {
-  loadResourcesAsync();
-});
-
-async function loadResourcesAsync() {
+async function deleteResourceAsync(id: string) {
   loader.show();
 
   try {
-    warehouses.value = await warehouseStore.findAsync();
+    await warehouseStore.deleteAsync(id);
+
+    toast.add({
+      severity: "success",
+      summary: "Warehouse deleted",
+    });
+
+    databaseRef.value?.loadTableAsync();
+  } finally {
+    loader.hide();
+  }
+}
+
+async function deleteResourcesAsync(ids: string[]) {
+  loader.show();
+
+  try {
+    for (const id of ids) {
+      await warehouseStore.deleteAsync(id);
+    }
+
+    toast.add({
+      severity: "success",
+      summary: "Warehouses deleted",
+    });
+
+    databaseRef.value?.loadTableAsync();
   } finally {
     loader.hide();
   }
@@ -123,25 +150,30 @@ function onAdd() {
   showAddSidebar.value = true;
 }
 
-function onAddConfirm() {
+function onAddCancel() {
+  showAddSidebar.value = false;
+  request.value.clear();
+}
+
+async function onAddConfirm() {
   loader.show();
 
-  setTimeout(() => {
-    warehouseStore
-      .createAsync(request.value)
-      .then(() => {
-        showAddSidebar.value = false;
-        loader.hide();
-      })
-      .catch(() => {
-        loader.hide();
-      });
-  }, 1000);
+  try {
+    await warehouseStore.createAsync(request.value);
+    showAddSidebar.value = false;
+    databaseRef.value?.loadTableAsync();
+  } finally {
+    loader.hide();
+  }
 }
 </script>
 
 <template>
   <div class="py-3">
+    <ConfirmDialog></ConfirmDialog>
+
+    <Toast />
+
     <Database
       ref="databaseRef"
       class="mb-6"
@@ -155,8 +187,6 @@ function onAddConfirm() {
       v-model:selected-rows="databaseSelectedRows"
     />
 
-    <WarehousesTable />
-
     <Sidebar
       v-model:visible="showAddSidebar"
       class="p-sidebar-md"
@@ -168,7 +198,7 @@ function onAddConfirm() {
       <template #header>
         <h3 class="m-0">Add Warehouse</h3>
       </template>
-      <div class="border-top-1 border-300 py-5">
+      <div class="border-top-1 border-200 py-5">
         <div class="p-float-label">
           <InputText
             id="username"
@@ -181,7 +211,10 @@ function onAddConfirm() {
       </div>
 
       <div class="flex justify-content-end">
-        <Button @click="onAddConfirm">Confirm</Button>
+        <Button @click="onAddCancel" class="p-button-sm p-button-outlined">
+          Cancel
+        </Button>
+        <Button @click="onAddConfirm" class="p-button-sm ml-2">Confirm</Button>
       </div>
     </Sidebar>
   </div>

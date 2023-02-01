@@ -12,7 +12,7 @@ onMounted(() => {
 
 <template>
   <div class="flex h-screen">
-    <aside class="border-right-1 border-200 w-16rem h-full">
+    <aside class="w-16rem h-full">
       <Sidebar />
     </aside>
     <div class="flex flex-column w-full h-full">

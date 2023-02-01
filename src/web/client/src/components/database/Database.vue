@@ -13,27 +13,30 @@ import type { DatabaseLoadFunction } from "./DatabaseLoadFunction";
 import type { ContextAction } from "../core";
 import type { MenuItem } from "primevue/menuitem";
 import type { IDatabase } from "./IDatabase";
-import type { BulkAction } from "./BulkAction";
+import type { TableAction } from "./TableAction";
+import type { TableBulkAction } from "./TableBulkAction";
+import type { RowPrimaryAction } from "./RowPrimaryAction";
+import type { RowSecondaryAction } from "./RowSecondaryAction";
 
 const props = withDefaults(
   defineProps<{
+    actions?: TableAction[];
+    bulkActions?: TableBulkAction<any>[];
     columns?: DatabaseColumn<any>[];
     filters?: DatabaseFilters<any>;
     primaryKey?: string;
-    rowActions?: ContextAction<any>[];
-    secondaryRowActions?: ContextAction<any>[];
+    rowActions?: RowPrimaryAction<any>[];
+    secondaryRowActions?: RowSecondaryAction<any>[];
     selectedRows?: any[];
-    actions?: ContextAction[];
-    bulkActions?: BulkAction<any>[];
     load?: DatabaseLoadFunction<any>;
   }>(),
   {
+    actions: () => [],
+    bulkActions: () => [],
     columns: () => [],
     rowActions: () => [],
     secondaryRowActions: () => [],
     selectedRows: () => [],
-    actions: () => [],
-    bulkActions: () => [],
   }
 );
 
@@ -60,10 +63,13 @@ const selectedRows = computed({
   set: (value: any[] | undefined) => emit("update:selectedRows", value),
 });
 
-const mainRowActionsMap = ref(new Map<number, ContextAction<any>[]>());
+const mainRowActionsMap = ref(new Map<number, RowPrimaryAction<any>[]>());
 const secondaryRowActionsMap = ref(new Map<number, MenuItem[]>());
 
-const menuItemsFactory = (item: any, actions: ContextAction[]): MenuItem[] => {
+const menuItemsFactory = (
+  item: any,
+  actions: ContextAction<any>[]
+): MenuItem[] => {
   if (!actions) {
     return [];
   }
@@ -134,12 +140,12 @@ function loadSecondaryRowActions() {
   secondaryRowActionsMap.value.clear();
 
   tableData.value.forEach((item, index) => {
-    const menuItems = menuItemsFactory(item, props.rowActions);
+    const menuItems = menuItemsFactory(item, props.secondaryRowActions);
     secondaryRowActionsMap.value.set(index, menuItems);
   });
 }
 
-async function onBulkAction(action: BulkAction<any>) {
+async function onBulkAction(action: TableBulkAction<any>) {
   if (!action.action) {
     return;
   }
@@ -156,20 +162,22 @@ async function onBulkAction(action: BulkAction<any>) {
   <Card class="border-50">
     <template #header v-if="props.actions">
       <div class="flex border-bottom-1 border-200 surface-50 p-2">
-        <Button
-          v-for="(action, index) in props.bulkActions"
-          class="ml-2"
-          :key="index"
-          @click="onBulkAction(action)"
-        >
-          {{ action.label }}
-        </Button>
+        <template v-if="selectedRows && selectedRows.length > 0">
+          <Button
+            v-for="(action, index) in props.bulkActions"
+            class="p-button-sm ml-2"
+            :key="index"
+            @click="onBulkAction(action)"
+          >
+            {{ action.label }}
+          </Button>
+        </template>
 
         <div class="mx-auto"></div>
 
         <Button
           v-for="(action, index) in props.actions"
-          class="ml-2"
+          class="p-button-sm ml-2"
           :key="index"
           @click="action.action ? action.action() : undefined"
         >
@@ -215,10 +223,11 @@ async function onBulkAction(action: BulkAction<any>) {
           <template #body="{ data, index: rowIndex }">
             <SplitButton
               :model="secondaryRowActionsMap.get(rowIndex)"
-              class="bg-primary border-round"
+              class="bg-primary border-round p-button-sm"
             >
               <Button
                 v-for="(action, actionIndex) in mainRowActionsMap.get(rowIndex)"
+                class="p-button-sm"
                 :key="actionIndex"
                 @click="action.action ? action.action(data) : undefined"
               >

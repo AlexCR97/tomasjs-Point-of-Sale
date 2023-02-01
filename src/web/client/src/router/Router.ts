@@ -5,7 +5,7 @@ export const Router = createRouter({
   routes: [
     {
       path: "/",
-      redirect: "/admin/products",
+      redirect: "/admin/warehouses",
     },
     {
       path: "/admin",
@@ -14,15 +14,7 @@ export const Router = createRouter({
       children: [
         {
           path: "/admin",
-          redirect: "/admin/products",
-        },
-        {
-          path: "/admin/products",
-          name: "products",
-          meta: {
-            title: "Products",
-          },
-          component: () => import("../pages/products/products-page.vue"),
+          redirect: "/admin/warehouses",
         },
         {
           path: "/admin/warehouses",
@@ -31,6 +23,14 @@ export const Router = createRouter({
             title: "Warehouses",
           },
           component: () => import("../pages/warehouses/warehouses-page.vue"),
+        },
+        {
+          path: "/admin/products",
+          name: "products",
+          meta: {
+            title: "Products",
+          },
+          component: () => import("../pages/products/products-page.vue"),
         },
       ],
     },
