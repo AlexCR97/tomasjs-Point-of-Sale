@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { CreateWarehouseRequest, WarehouseModel } from "@/api/warehouses";
+import {
+  CreateWarehouseRequest,
+  UpdateWarehouseRequest,
+  WarehouseModel,
+} from "@/api/warehouses";
 import { WarehouseStore } from "@/api/warehouses/warehouse.store";
 // import type { ContextAction } from "@/components/core";
 import type {
@@ -29,7 +33,9 @@ const loader = useLoader();
 const confirm = useConfirm();
 const toast = useToast();
 const showAddSidebar = ref(false);
-const request = ref(new CreateWarehouseRequest());
+const showDetailsSidebar = ref(false);
+const createRequest = ref(new CreateWarehouseRequest());
+const updateRequest = ref(new UpdateWarehouseRequest());
 
 const databaseRef = ref<IDatabase>();
 
@@ -81,12 +87,10 @@ const databaseFilters = ref<DatabaseFilters<WarehouseModel>>({
   },
 });
 
-const databaseMainRowActions = ref<RowPrimaryAction<WarehouseModel>[]>([
+const databasePrimaryRowActions = ref<RowPrimaryAction<WarehouseModel>[]>([
   {
     label: "View",
-    action: (warehouse) => {
-      console.log("View", warehouse);
-    },
+    action: (warehouse) => onViewDetails(warehouse._id),
   },
 ]);
 
@@ -150,17 +154,50 @@ function onAdd() {
   showAddSidebar.value = true;
 }
 
+async function onViewDetails(id: string) {
+  loader.show();
+
+  try {
+    const warehouse = await warehouseStore.getAsync(id);
+    updateRequest.value.id = warehouse._id;
+    updateRequest.value.name = warehouse.name;
+    showDetailsSidebar.value = true;
+  } finally {
+    loader.hide();
+  }
+}
+
 function onAddCancel() {
   showAddSidebar.value = false;
-  request.value.clear();
+  createRequest.value.clear();
+}
+
+function onDetailsCancel() {
+  showDetailsSidebar.value = false;
+  updateRequest.value.clear();
 }
 
 async function onAddConfirm() {
   loader.show();
 
   try {
-    await warehouseStore.createAsync(request.value);
+    await warehouseStore.createAsync(createRequest.value);
     showAddSidebar.value = false;
+    databaseRef.value?.loadTableAsync();
+  } finally {
+    loader.hide();
+  }
+}
+
+async function onDetailsConfirm() {
+  loader.show();
+
+  try {
+    await warehouseStore.updateAsync(
+      updateRequest.value.id,
+      updateRequest.value
+    );
+    showDetailsSidebar.value = false;
     databaseRef.value?.loadTableAsync();
   } finally {
     loader.hide();
@@ -181,7 +218,7 @@ async function onAddConfirm() {
       :bulk-actions="databaseBulkActions"
       :columns="databaseColumns"
       :load="databaseLoadFunction"
-      :row-actions="databaseMainRowActions"
+      :row-actions="databasePrimaryRowActions"
       :secondary-row-actions="databaseSecondaryRowActions"
       v-model:filters="databaseFilters"
       v-model:selected-rows="databaseSelectedRows"
@@ -204,7 +241,7 @@ async function onAddConfirm() {
             id="username"
             class="w-full"
             type="text"
-            v-model="request.name"
+            v-model="createRequest.name"
           />
           <label for="username">Name</label>
         </div>
@@ -215,6 +252,49 @@ async function onAddConfirm() {
           Cancel
         </Button>
         <Button @click="onAddConfirm" class="p-button-sm ml-2">Confirm</Button>
+      </div>
+    </Sidebar>
+
+    <Sidebar
+      v-model:visible="showDetailsSidebar"
+      class="p-sidebar-md"
+      :baseZIndex="10000"
+      :dismissable="false"
+      :show-close-icon="false"
+      position="right"
+    >
+      <template #header>
+        <h3 class="m-0">Warehouse Details</h3>
+      </template>
+      <div class="border-top-1 border-200 py-5">
+        <div class="p-float-label mb-6">
+          <InputText
+            id="detailsId"
+            class="w-full"
+            readonly
+            type="text"
+            v-model="updateRequest.id"
+          />
+          <label for="detailsId">ID</label>
+        </div>
+        <div class="p-float-label">
+          <InputText
+            id="detailsName"
+            class="w-full"
+            type="text"
+            v-model="updateRequest.name"
+          />
+          <label for="detailsName">Name</label>
+        </div>
+      </div>
+
+      <div class="flex justify-content-end">
+        <Button @click="onDetailsCancel" class="p-button-sm p-button-outlined">
+          Cancel
+        </Button>
+        <Button @click="onDetailsConfirm" class="p-button-sm ml-2"
+          >Confirm</Button
+        >
       </div>
     </Sidebar>
   </div>
