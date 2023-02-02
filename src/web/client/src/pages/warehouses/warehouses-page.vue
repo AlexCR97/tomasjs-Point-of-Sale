@@ -10,11 +10,13 @@ import type {
   DatabaseFilters,
   DatabaseLoadFunction,
 } from "@/components/database";
+import { useWarehouseSelect } from "@/components/warehouse-select";
 import { FilterMatchMode } from "primevue/api";
 import InputText from "primevue/inputtext";
 import { ref } from "vue";
 
 const store = new WarehouseStore();
+const warehouseSelect = useWarehouseSelect();
 const createRequest = ref(new CreateWarehouseRequest());
 const updateRequest = ref(new UpdateWarehouseRequest());
 
@@ -27,6 +29,7 @@ const loadResourcesFunction: DatabaseLoadFunction<
 const createResourceFunction = async () => {
   await store.createAsync(createRequest.value);
   createRequest.value.clear();
+  warehouseSelect.loadWarehousesAsync();
 };
 
 const deleteResourceFunction = async (id: string) => {

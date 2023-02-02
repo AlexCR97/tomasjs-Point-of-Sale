@@ -1,15 +1,11 @@
 <script setup lang="ts">
 import Dropdown from "primevue/dropdown";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useWarehouseSelect } from "./warehouse-select.store";
 
 const warehouseSelect = useWarehouseSelect();
 
-const warehouses = ref<any[]>([
-  { id: "1", name: "Warehouse 1" },
-  { id: "2", name: "Warehouse 2" },
-  { id: "3", name: "Warehouse 3" },
-]);
+const warehouses = computed(() => warehouseSelect.warehouses);
 
 const selectedWarehouse = computed({
   get: () => warehouseSelect.selectedWarehouse,
@@ -25,8 +21,8 @@ const selectedWarehouse = computed({
       v-model="selectedWarehouse"
       class="w-full"
       :options="warehouses"
+      optionValue="_id"
       optionLabel="name"
-      optionValue="id"
       placeholder="Select a Warehouse"
     />
   </div>

@@ -2,11 +2,15 @@
 import PageHeader from "@/components/page-header/PageHeader.vue";
 import Sidebar from "@/components/Sidebar.vue";
 import Topbar from "@/components/Topbar.vue";
+import { useWarehouseSelect } from "@/components/warehouse-select";
 import { onMounted } from "vue";
 import { RouterView } from "vue-router";
 
+const warehouseSelect = useWarehouseSelect();
+
 onMounted(() => {
   console.log("mounted");
+  warehouseSelect.loadWarehousesAsync();
 });
 </script>
 
