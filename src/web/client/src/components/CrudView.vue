@@ -104,7 +104,8 @@ const databaseLoadFunction: DatabaseLoadFunction<object> = async () => {
     .map(Object.keys) // Get the keys of all objects
     .reduce((accumulator, value) => accumulator.concat(value), []) // Flatten the array of arrays
     .filter((key, index, self) => index === self.indexOf(key)) // Remove duplicates
-    .filter((key) => !ignoredSchemaKeys.includes(key as any)); // Remove the ignored keys
+    .filter((key) => !ignoredSchemaKeys.includes(key as any)) // Remove the ignored keys
+    .sort((a, b) => (a < b ? -1 : 1));
 
   databaseColumns.value = [];
 

@@ -1,4 +1,3 @@
-import { defineStore } from "pinia";
 import { BaseApiStore } from "../core";
 import type { CreateWarehouseRequest } from "./CreateWarehouseRequest";
 import type { UpdateWarehouseRequest } from "./UpdateWarehouseRequest";
@@ -13,7 +12,3 @@ export class WarehouseStore extends BaseApiStore<
     super("warehouses");
   }
 }
-
-export const useWarehouseStore = defineStore("WarehouseStore", () => {
-  return new WarehouseStore();
-});

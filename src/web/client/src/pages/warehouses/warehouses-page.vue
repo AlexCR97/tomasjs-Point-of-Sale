@@ -1,84 +1,55 @@
 <script setup lang="ts">
 import {
   CreateWarehouseRequest,
-  UpdateWarehouseRequest,
   WarehouseModel,
+  UpdateWarehouseRequest,
+  WarehouseStore,
 } from "@/api/warehouses";
-import { WarehouseStore } from "@/api/warehouses/warehouse.store";
-// import type { ContextAction } from "@/components/core";
+import CrudView from "@/components/CrudView.vue";
 import type {
-  DatabaseColumn,
   DatabaseFilters,
   DatabaseLoadFunction,
-  IDatabase,
-  RowPrimaryAction,
-  RowSecondaryAction,
-  TableAction,
-  TableBulkAction,
 } from "@/components/database";
-import Database from "@/components/database/Database.vue";
-import { useLoader } from "@/components/loader";
 import { FilterMatchMode } from "primevue/api";
-import Button from "primevue/button";
-import ConfirmDialog from "primevue/confirmdialog";
 import InputText from "primevue/inputtext";
-import Sidebar from "primevue/sidebar";
-import Toast from "primevue/toast";
-import { useConfirm } from "primevue/useconfirm";
-import { useToast } from "primevue/usetoast";
 import { ref } from "vue";
 
-const warehouseStore = new WarehouseStore();
-const loader = useLoader();
-const confirm = useConfirm();
-const toast = useToast();
-const showAddSidebar = ref(false);
-const showDetailsSidebar = ref(false);
+const store = new WarehouseStore();
 const createRequest = ref(new CreateWarehouseRequest());
 const updateRequest = ref(new UpdateWarehouseRequest());
 
-const databaseRef = ref<IDatabase>();
+const loadResourcesFunction: DatabaseLoadFunction<
+  WarehouseModel
+> = async () => {
+  return await store.findAsync();
+};
 
-const databaseBulkActions = ref<TableBulkAction<WarehouseModel>[]>([
-  {
-    label: "Delete Selected",
-    action: (selectedModels) => {
-      return new Promise<boolean>((resolve) => {
-        confirm.require({
-          message: "Are you sure you want to delete the selected warehouses?",
-          accept: () =>
-            deleteResourcesAsync(selectedModels.map((x) => x._id))
-              .then(() => resolve(true))
-              .catch(() => resolve(false)),
-        });
-      });
-    },
-  },
-]);
+const createResourceFunction = async () => {
+  await store.createAsync(createRequest.value);
+  createRequest.value.clear();
+};
 
-const databaseActions = ref<TableAction[]>([
-  {
-    label: "Add Warehouse",
-    action: () => onAdd(),
-  },
-  {
-    label: "Refresh",
-    action: () => databaseRef.value?.loadTableAsync(),
-  },
-]);
+const deleteResourceFunction = async (id: string) => {
+  await store.deleteAsync(id);
+};
 
-const databaseColumns = ref<DatabaseColumn<WarehouseModel>[]>([
-  {
-    header: "ID",
-    field: "_id",
-  },
-  {
-    header: "Name",
-    field: "name",
-  },
-]);
+const deleteResourcesFunction = async (ids: string[]) => {
+  for (const id of ids) {
+    await store.deleteAsync(id);
+  }
+};
 
-const databaseFilters = ref<DatabaseFilters<WarehouseModel>>({
+const updateResourceFunction = async (resource: WarehouseModel) => {
+  await store.updateAsync(resource._id, updateRequest.value);
+  updateRequest.value.clear();
+};
+
+const detailsFormPanelMapFunction = (resource: WarehouseModel) => {
+  updateRequest.value.id = resource._id;
+  updateRequest.value.name = resource.name;
+};
+
+const filters = ref<DatabaseFilters<WarehouseModel>>({
   _id: {
     matchMode: FilterMatchMode.EQUALS,
   },
@@ -86,216 +57,53 @@ const databaseFilters = ref<DatabaseFilters<WarehouseModel>>({
     matchMode: FilterMatchMode.CONTAINS,
   },
 });
-
-const databasePrimaryRowActions = ref<RowPrimaryAction<WarehouseModel>[]>([
-  {
-    label: "View",
-    action: (warehouse) => onViewDetails(warehouse._id),
-  },
-]);
-
-const databaseSecondaryRowActions = ref<RowSecondaryAction<WarehouseModel>[]>([
-  {
-    label: "Delete",
-    action: (warehouse) => {
-      confirm.require({
-        message: `Are you sure you want to delete the warehouse "${warehouse.name}"`,
-        accept: () => deleteResourceAsync(warehouse._id),
-      });
-    },
-  },
-]);
-
-const databaseLoadFunction = ref<DatabaseLoadFunction<WarehouseModel>>(
-  async () => {
-    return await warehouseStore.findAsync();
-  }
-);
-
-const databaseSelectedRows = ref<WarehouseModel[]>([]);
-
-async function deleteResourceAsync(id: string) {
-  loader.show();
-
-  try {
-    await warehouseStore.deleteAsync(id);
-
-    toast.add({
-      severity: "success",
-      summary: "Warehouse deleted",
-    });
-
-    databaseRef.value?.loadTableAsync();
-  } finally {
-    loader.hide();
-  }
-}
-
-async function deleteResourcesAsync(ids: string[]) {
-  loader.show();
-
-  try {
-    for (const id of ids) {
-      await warehouseStore.deleteAsync(id);
-    }
-
-    toast.add({
-      severity: "success",
-      summary: "Warehouses deleted",
-    });
-
-    databaseRef.value?.loadTableAsync();
-  } finally {
-    loader.hide();
-  }
-}
-
-function onAdd() {
-  showAddSidebar.value = true;
-}
-
-async function onViewDetails(id: string) {
-  loader.show();
-
-  try {
-    const warehouse = await warehouseStore.getAsync(id);
-    updateRequest.value.id = warehouse._id;
-    updateRequest.value.name = warehouse.name;
-    showDetailsSidebar.value = true;
-  } finally {
-    loader.hide();
-  }
-}
-
-function onAddCancel() {
-  showAddSidebar.value = false;
-  createRequest.value.clear();
-}
-
-function onDetailsCancel() {
-  showDetailsSidebar.value = false;
-  updateRequest.value.clear();
-}
-
-async function onAddConfirm() {
-  loader.show();
-
-  try {
-    await warehouseStore.createAsync(createRequest.value);
-    showAddSidebar.value = false;
-    databaseRef.value?.loadTableAsync();
-  } finally {
-    loader.hide();
-  }
-}
-
-async function onDetailsConfirm() {
-  loader.show();
-
-  try {
-    await warehouseStore.updateAsync(
-      updateRequest.value.id,
-      updateRequest.value
-    );
-    showDetailsSidebar.value = false;
-    databaseRef.value?.loadTableAsync();
-  } finally {
-    loader.hide();
-  }
-}
 </script>
 
 <template>
-  <div class="py-3">
-    <ConfirmDialog></ConfirmDialog>
-
-    <Toast />
-
-    <Database
-      ref="databaseRef"
-      class="mb-6"
-      :actions="databaseActions"
-      :bulk-actions="databaseBulkActions"
-      :columns="databaseColumns"
-      :load="databaseLoadFunction"
-      :row-actions="databasePrimaryRowActions"
-      :secondary-row-actions="databaseSecondaryRowActions"
-      v-model:filters="databaseFilters"
-      v-model:selected-rows="databaseSelectedRows"
-    />
-
-    <Sidebar
-      v-model:visible="showAddSidebar"
-      class="p-sidebar-md"
-      :baseZIndex="10000"
-      :dismissable="false"
-      :show-close-icon="false"
-      position="right"
+  <div>
+    <CrudView
+      resource-name="Warehouse"
+      resource-name-plural="Warehouses"
+      :load-resources-function="loadResourcesFunction"
+      :create-resource-function="createResourceFunction"
+      :delete-resource-function="deleteResourceFunction"
+      :delete-resources-function="deleteResourcesFunction"
+      :update-resource-function="updateResourceFunction"
+      :details-form-panel-map-function="detailsFormPanelMapFunction"
+      v-model:filters="filters"
     >
-      <template #header>
-        <h3 class="m-0">Add Warehouse</h3>
-      </template>
-      <div class="border-top-1 border-200 py-5">
+      <template #createForm>
         <div class="p-float-label">
           <InputText
-            id="username"
+            id="createUsername"
             class="w-full"
             type="text"
             v-model="createRequest.name"
           />
-          <label for="username">Name</label>
+          <label for="createUsername">Name</label>
         </div>
-      </div>
-
-      <div class="flex justify-content-end">
-        <Button @click="onAddCancel" class="p-button-sm p-button-outlined">
-          Cancel
-        </Button>
-        <Button @click="onAddConfirm" class="p-button-sm ml-2">Confirm</Button>
-      </div>
-    </Sidebar>
-
-    <Sidebar
-      v-model:visible="showDetailsSidebar"
-      class="p-sidebar-md"
-      :baseZIndex="10000"
-      :dismissable="false"
-      :show-close-icon="false"
-      position="right"
-    >
-      <template #header>
-        <h3 class="m-0">Warehouse Details</h3>
       </template>
-      <div class="border-top-1 border-200 py-5">
+      <template #detailsForm="{ resourceId }">
         <div class="p-float-label mb-6">
           <InputText
-            id="detailsId"
+            id="resourceId"
             class="w-full"
             readonly
             type="text"
-            v-model="updateRequest.id"
+            :model-value="resourceId"
           />
-          <label for="detailsId">ID</label>
+          <label for="resourceId">ID</label>
         </div>
         <div class="p-float-label">
           <InputText
-            id="detailsName"
+            id="updateUsername"
             class="w-full"
             type="text"
             v-model="updateRequest.name"
           />
-          <label for="detailsName">Name</label>
+          <label for="updateUsername">Name</label>
         </div>
-      </div>
-
-      <div class="flex justify-content-end">
-        <Button @click="onDetailsCancel" class="p-button-sm p-button-outlined">
-          Cancel
-        </Button>
-        <Button @click="onDetailsConfirm" class="p-button-sm ml-2"
-          >Confirm</Button
-        >
-      </div>
-    </Sidebar>
+      </template>
+    </CrudView>
   </div>
 </template>
