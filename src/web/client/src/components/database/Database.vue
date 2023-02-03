@@ -206,7 +206,7 @@ async function onBulkAction(action: TableBulkAction<any>) {
           :sortable="true"
         >
           <template
-            v-if="props.filters"
+            v-if="props.filters && props.filters[column.field as any]"
             #filter="{ filterModel, filterCallback }"
           >
             <InputText

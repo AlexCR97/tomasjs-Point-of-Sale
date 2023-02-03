@@ -11,6 +11,7 @@ import type {
   DatabaseFilters,
   DatabaseLoadFunction,
 } from "@/components/database";
+import { useWarehouseSelect } from "@/components/warehouse-select";
 import { FilterMatchMode } from "primevue/api";
 import Dropdown from "primevue/dropdown";
 import InputNumber from "primevue/inputnumber";
@@ -18,6 +19,7 @@ import { onMounted, ref } from "vue";
 
 const store = new StockItemStore();
 const productStore = new ProductStore();
+const warehouseSelect = useWarehouseSelect();
 const createRequest = ref(new CreateStockItemRequest());
 const updateRequest = ref(new UpdateStockItemRequest());
 const products = ref<ProductModel[]>([]);
@@ -33,6 +35,7 @@ const loadResourcesFunction: DatabaseLoadFunction<
 };
 
 const createResourceFunction = async () => {
+  createRequest.value.warehouseId = warehouseSelect.selectedWarehouse;
   await store.createAsync(createRequest.value);
   createRequest.value.clear();
 };
@@ -48,6 +51,7 @@ const deleteResourcesFunction = async (ids: string[]) => {
 };
 
 const updateResourceFunction = async (resource: StockItemModel) => {
+  updateRequest.value.warehouseId = warehouseSelect.selectedWarehouse;
   await store.updateAsync(resource._id, updateRequest.value);
   updateRequest.value.clear();
 };

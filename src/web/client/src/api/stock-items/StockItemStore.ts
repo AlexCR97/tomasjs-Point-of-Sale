@@ -9,6 +9,6 @@ export class StockItemStore extends BaseApiStore<
   UpdateStockItemRequest
 > {
   constructor() {
-    super("api/stock-items");
+    super("stock-items");
   }
 }
