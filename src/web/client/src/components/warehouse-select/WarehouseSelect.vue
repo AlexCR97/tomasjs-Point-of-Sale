@@ -8,9 +8,9 @@ const warehouseSelect = useWarehouseSelect();
 const warehouses = computed(() => warehouseSelect.warehouses);
 
 const selectedWarehouse = computed({
-  get: () => warehouseSelect.selectedWarehouse,
+  get: () => warehouseSelect.selectedWarehouseOrDefault,
   set: (value: string | undefined) =>
-    (warehouseSelect.selectedWarehouse = value),
+    warehouseSelect.setSelectedWarehouse(value),
 });
 </script>
 

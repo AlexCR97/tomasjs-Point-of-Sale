@@ -17,17 +17,6 @@ const standaloneItems = ref<MenuItem[]>([
     label: "Products",
     to: { name: "products" },
   },
-]);
-
-const warehouseItems = ref<MenuItem[]>([
-  {
-    icon: PrimeIcons.SHOPPING_CART,
-    label: "Stock",
-  },
-  {
-    icon: PrimeIcons.DOLLAR,
-    label: "Sales",
-  },
   {
     icon: PrimeIcons.USER,
     label: "Customers",
@@ -35,6 +24,18 @@ const warehouseItems = ref<MenuItem[]>([
   {
     icon: PrimeIcons.USERS,
     label: "Users",
+  },
+]);
+
+const warehouseItems = ref<MenuItem[]>([
+  {
+    icon: PrimeIcons.SHOPPING_CART,
+    label: "Stock",
+    to: { name: "stock-items" },
+  },
+  {
+    icon: PrimeIcons.DOLLAR,
+    label: "Sales",
   },
 ]);
 </script>

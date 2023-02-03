@@ -1,3 +1,4 @@
+import { useWarehouseGuard } from "@/guards";
 import { createRouter, createWebHistory } from "vue-router";
 
 export const Router = createRouter({
@@ -10,7 +11,7 @@ export const Router = createRouter({
     {
       path: "/admin",
       name: "admin",
-      component: () => import("../pages/home-page.vue"),
+      component: () => import("../pages/admin/home-page.vue"),
       children: [
         {
           path: "/admin",
@@ -22,7 +23,16 @@ export const Router = createRouter({
           meta: {
             title: "Warehouses",
           },
-          component: () => import("../pages/warehouses/warehouses-page.vue"),
+          component: () =>
+            import("../pages/admin/warehouses/warehouses-page.vue"),
+        },
+        {
+          path: "/admin/warehouse-not-selected",
+          name: "warehouse-not-selected",
+          meta: {
+            title: "Warehouse Not Selected!",
+          },
+          component: () => import("../pages/admin/warehouse-not-selected.vue"),
         },
         {
           path: "/admin/products",
@@ -30,7 +40,17 @@ export const Router = createRouter({
           meta: {
             title: "Products",
           },
-          component: () => import("../pages/products/products-page.vue"),
+          component: () => import("../pages/admin/products/products-page.vue"),
+        },
+        {
+          path: "/admin/stock-items",
+          name: "stock-items",
+          meta: {
+            title: "Stock",
+          },
+          beforeEnter: useWarehouseGuard(),
+          component: () =>
+            import("../pages/admin/stock-items/stock-items-page.vue"),
         },
       ],
     },
